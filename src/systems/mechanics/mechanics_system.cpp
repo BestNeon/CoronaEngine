@@ -20,7 +20,7 @@
 
 namespace {
 
-// 八叉树潜在碰撞对；窄相位仍用 AABB 重叠 + 分离
+// 八叉树潜在碰撞对；窄相位用 AABB 重叠 + 分离
 struct OctreeEntry {
     std::uintptr_t handle;
     ktm::fvec3 min_bounds;
