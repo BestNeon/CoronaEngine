@@ -405,6 +405,7 @@ const editorApiStatic = {
     onActorSelectionChanged: (callback) => register_manifest_editor_api_callback('events.onActorSelectionChanged', callback),
     onActorTransformUpdated: (callback) => register_manifest_editor_api_callback('events.onActorTransformUpdated', callback),
     onActorPickResult: (callback) => register_manifest_editor_api_callback('events.onActorPickResult', callback),
+    onViewportGizmoPointerResult: (callback) => register_manifest_editor_api_callback('events.onViewportGizmoPointerResult', callback),
     onFocusPoseResult: (callback) => register_manifest_editor_api_callback('events.onFocusPoseResult', callback),
     onNetworkActorDeleteSyncBroadcastRequested: (callback) => register_manifest_editor_api_callback('events.onNetworkActorDeleteSyncBroadcastRequested', callback),
     onNetworkActorOwnershipClaimed: (callback) => register_manifest_editor_api_callback('events.onNetworkActorOwnershipClaimed', callback),
@@ -588,8 +589,11 @@ const editorApiStatic = {
       call_manifest_editor_api('sceneTools.renameActor', [sceneName, actorName, name]),
     openActor: (sceneName, actorName) =>
       call_manifest_editor_api('sceneTools.openActor', [sceneName, actorName]),
-    selectActor: (sceneName, actorType, actorName) =>
-      call_manifest_editor_api('sceneTools.selectActor', [sceneName, actorType, actorName]),
+    selectActor: (sceneName, actorType, actorName, context = null) =>
+      call_manifest_editor_api(
+        'sceneTools.selectActor',
+        context ? [sceneName, actorType, actorName, context] : [sceneName, actorType, actorName],
+      ),
     focusActor: (sceneName, actorName, cameraName) =>
       call_manifest_editor_api('sceneTools.focusActor', [sceneName, actorName, cameraName]),
     setRenderBackend: (mode, sceneName = null, cameraId = null) =>
@@ -933,8 +937,32 @@ export const aiService = {
     });
     return response?.data ?? response;
   },
-  loadCabbageContext: async () => {
-    const response = await editorApi.ai.submitRequest({ operation: 'cabbage.context.load' });
+  startNodeGraphGeneration: async (payload) => {
+    const response = await editorApi.ai.submitRequest({
+      operation: 'node_graph.generate.start',
+      payload: payload || {},
+    });
+    return response?.data ?? response;
+  },
+  getNodeGraphGenerationStatus: async (taskId) => {
+    const response = await editorApi.ai.submitRequest({
+      operation: 'node_graph.generate.status',
+      taskId: String(taskId || ''),
+    });
+    return response?.data ?? response;
+  },
+  cancelNodeGraphGeneration: async (taskId) => {
+    const response = await editorApi.ai.submitRequest({
+      operation: 'node_graph.generate.cancel',
+      taskId: String(taskId || ''),
+    });
+    return response?.data ?? response;
+  },
+  loadCabbageContext: async (payload = {}) => {
+    const response = await editorApi.ai.submitRequest({
+      operation: 'cabbage.context.load',
+      payload,
+    });
     return response?.data ?? response;
   },
   recordCabbageEvent: async (payload) => {
@@ -955,6 +983,20 @@ export const aiService = {
     const response = await editorApi.ai.submitRequest({
       operation: 'cabbage.context.append_message',
       payload: payload || {},
+    });
+    return response?.data ?? response;
+  },
+  startCabbageGoalPlan: async (payload = {}) => {
+    const response = await editorApi.ai.submitRequest({
+      operation: 'cabbage.goal_plan.start',
+      payload,
+    });
+    return response?.data ?? response;
+  },
+  getCabbageGoalPlanStatus: async (taskId) => {
+    const response = await editorApi.ai.submitRequest({
+      operation: 'cabbage.goal_plan.status',
+      taskId: String(taskId || ''),
     });
     return response?.data ?? response;
   },
